@@ -58,7 +58,7 @@ public class ControlSpotLight : MonoBehaviour
     public void changeSpeed()
     {
         float normal = Mathf.InverseLerp(1.25f, 1.5f, speedObj.transform.position.x);
-        speed = Mathf.Lerp(0.1f, 2.5f, normal);
+        speed = Mathf.Lerp(0.1f, 1.5f, normal);
         //speed = 1.61f - speedObj.transform.position.x;
         print(speed);
         if (playing)

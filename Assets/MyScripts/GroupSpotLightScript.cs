@@ -8,17 +8,16 @@ public class GroupSpotLightScript : MonoBehaviour
     private List<Light> spotLightList;
     private List<Color> colorArr;
     private GameObject speedObj;
-    private bool playing, vertical, on;
+    private bool playing, vertical, on, even;
+    private bool flashLights, evenOdd, randColors, sameColors;
     private float speed;
-    private string currentFunctionName; //will be used to know what the current Invoke has called
     // Start is called before the first frame update
     void Start()
     {
-        playing = false;
-        vertical = false;
-        on = false;
+        playing = on = false;
+        vertical = even = false;
+        flashLights = evenOdd = randColors = sameColors = false;
         speed = 0.5f;
-        currentFunctionName = "";
         spotLightObjList = new List<GameObject>();
         spotLightList = new List<Light>();
         colorArr = new List<Color>();
@@ -39,36 +38,69 @@ public class GroupSpotLightScript : MonoBehaviour
     }
 
     //Function that turns on the system and will call subroutines to create it's own light show randomly
-    public void automatic()
+    public void play()
     {
-        playing = !playing;
         if (playing)
         {
-            //Call a bunch of random functions in a calculated way :thinking: Basically not a pure chaotic randomness but not pseudo random either
-            //InvokeRepeating("toggleAllLights", 0f, speed);
-            //currentFunctionName = "toggleAllLights";
             if (!on)
                 turnOn();
-            InvokeRepeating("randomColors", 0f, speed);
-            currentFunctionName = "randomColors";
+            CancelInvoke(); //Might need a try catch if there is nothing to cancel
+
+            if (flashLights)
+            {
+                resetLights();
+                InvokeRepeating("flashAllLights", 0f, speed);
+            }
+            else if (evenOdd)
+            {
+                resetLights();
+                InvokeRepeating("evenOddLights", 0f, speed);
+            }
+
+            if (randColors)
+            {
+                InvokeRepeating("randomColors", 0f, speed);
+            }
+            else if (sameColors)
+            {
+                InvokeRepeating("singularColor", 0f, speed);
+            }
         }
     }
 
-    //Function that turns on or off the system
+    //Function that turns off the system
     public void turnOff()
     {
         CancelInvoke(); //Might need a try catch if there is nothing to cancel
+        for (int i = 0; i < 8; ++i)
+        {
+            spotLightList[i].enabled = false;
+        }
         playing = false;
+        on = false;
+    }
+
+    //Turn on all the lights and sets them all to white, their original color
+    public void turnOn()
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            spotLightList[i].enabled = true;
+            spotLightList[i].color = Color.white;
+        }
+        on = true;
+        playing = true;
     }
 
     //Function that calcualtes the position of the object and maps it to a value for speed
     public void changeSpeed()
     {
         float normal = Mathf.InverseLerp(0.68f, 1.0f, speedObj.transform.position.x);
-        speed = Mathf.Lerp(0.1f, 2.5f, normal);
+        speed = Mathf.Lerp(0.1f, 1.33f, normal);
         //Recall our current pattern with the new speed
-        CancelInvoke();
-        InvokeRepeating(currentFunctionName, 0f, speed);
+        play();
+        //CancelInvoke();
+        //InvokeRepeating(currentFunctionName, 0f, speed);
     }
 
     //Function that repositions the object so that the local Y and local Z is constant
@@ -89,6 +121,42 @@ public class GroupSpotLightScript : MonoBehaviour
         print(speedObj.GetComponent<Rigidbody>().velocity);
     }
 
+    //Function that sets the flag for the flashing lights pattern to play. Only one light pattern can be set at a time. FlashLight corresponds with flashAllLights
+    public void flashLightsButton()
+    {
+        flashLights = true;
+        evenOdd = false;
+    }
+
+    //Function that sets the flag for even odd flashing to play. Only one light pattern can be set at a time. Even odd corresponds with evenOddLights
+    public void evenOddLightsButton()
+    {
+        evenOdd = true;
+        flashLights = false;
+    }
+
+    //Function that sets the flag for random colors to play. and applies instantly. Only one color pattern can be set at a time. Corresponds with randomcolors
+    public void randomColorsButton()
+    {
+        randColors = true;
+        sameColors = false;
+        randomColors();
+    }
+
+    //Function that sets the flag for same colors to play and applies instantly. Only one color pattern can be set at a time. Corresponds with singularColor
+    public void sameColorsButton()
+    {
+        sameColors = true;
+        randColors = false;
+        singularColor();
+    }
+
+
+
+
+
+
+
     //Assigns a random color to each individual light
     private void randomColors()
     {
@@ -98,14 +166,51 @@ public class GroupSpotLightScript : MonoBehaviour
         }
     }
 
-    private void toggleAllLights()
+    //Assigns the same singular color to each individual light
+    private void singularColor()
+    {
+        int color = Random.Range(0, 8);
+        for (int i = 0; i < 8; ++i)
+        {
+            spotLightList[i].color = colorArr[color];
+        }
+    }
+
+    //Turns off or on the lights. Call this function multiple times to simulate a light turning on and off repeatidly
+    private void flashAllLights()
     {
         for(int i = 0; i < 8; ++i)
         {
             spotLightList[i].enabled = !spotLightList[i].enabled;
         }
-
     } 
+
+    //Function that will turn on or off the lights in an even/odd pattern. Call this function multiple times to simulate it turning on or off repeatidly
+    private void evenOddLights()
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            if(even && i%2 == 0)
+                spotLightList[i].enabled = true;
+            else if(even && i%2 == 1)
+                spotLightList[i].enabled = false;
+
+            if(!even && i%2 ==1)
+                spotLightList[i].enabled = true;
+            else if(!even && i%2 == 0)
+                spotLightList[i].enabled = false;
+        }
+        even = !even;
+    }
+
+    //Function that is used to reset all lights to on, different then turn on because we don't mess with the colors of the light or any other boolean vars
+    private void resetLights()
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            spotLightList[i].enabled = true;
+        }
+    }
 
     //Function that will transition all the spotlights into vertical or horizontal
     private void transition()
@@ -119,15 +224,6 @@ public class GroupSpotLightScript : MonoBehaviour
         else
         {
             
-        }
-    }
-
-    //Turn on all the lights
-    private void turnOn()
-    {
-        for(int i = 0; i < 8; ++i)
-        {
-            spotLightList[i].enabled = true;
         }
     }
 
