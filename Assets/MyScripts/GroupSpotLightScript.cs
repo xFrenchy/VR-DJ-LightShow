@@ -8,14 +8,13 @@ public class GroupSpotLightScript : MonoBehaviour
     private List<Light> spotLightList;
     private List<Color> colorArr;
     private GameObject speedObj;
-    private bool playing, vertical, on, even;
+    private bool playing, on, even;
     private bool flashLights, evenOdd, randColors, sameColors;
     private float speed;
     // Start is called before the first frame update
     void Start()
     {
-        playing = on = false;
-        vertical = even = false;
+        playing = on = even = false;
         flashLights = evenOdd = randColors = sameColors = false;
         speed = 0.5f;
         spotLightObjList = new List<GameObject>();
@@ -80,7 +79,7 @@ public class GroupSpotLightScript : MonoBehaviour
         on = false;
     }
 
-    //Turn on all the lights and sets them all to white, their original color
+    //Turn on the lights and sets them all to white, their original color.
     public void turnOn()
     {
         for (int i = 0; i < 8; ++i)
@@ -99,8 +98,6 @@ public class GroupSpotLightScript : MonoBehaviour
         speed = Mathf.Lerp(0.1f, 1.33f, normal);
         //Recall our current pattern with the new speed
         play();
-        //CancelInvoke();
-        //InvokeRepeating(currentFunctionName, 0f, speed);
     }
 
     //Function that repositions the object so that the local Y and local Z is constant
@@ -109,10 +106,10 @@ public class GroupSpotLightScript : MonoBehaviour
         //make sure that local Y = 0 and local Z = 1.35
         //Can't get local to work so I'm using y = 0.194 and Z = -0.1225
         if (speedObj.transform.position.x >= 1.0)
-            speedObj.transform.position = new Vector3(1.0f, 0.819f, -0.071f);
+            speedObj.transform.localPosition= new Vector3(1.0f, 0.819f, -0.071f);
 
         else if (speedObj.transform.position.x <= 0.68)
-            speedObj.transform.position = new Vector3(0.68f, 0.819f, -0.071f);
+            speedObj.transform.localPosition = new Vector3(0.68f, 0.819f, -0.071f);
 
         //Stop any momentum
         speedObj.GetComponent<Rigidbody>().velocity = Vector3.zero;
@@ -209,21 +206,6 @@ public class GroupSpotLightScript : MonoBehaviour
         for (int i = 0; i < 8; ++i)
         {
             spotLightList[i].enabled = true;
-        }
-    }
-
-    //Function that will transition all the spotlights into vertical or horizontal
-    private void transition()
-    {
-        if (vertical)
-        {
-            //Use a function to make the first group rotate to Y = 90 progressively
-
-            //Use a function to make the second group rotate to X = 90 progressively
-        }
-        else
-        {
-            
         }
     }
 
