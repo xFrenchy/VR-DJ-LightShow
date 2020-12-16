@@ -7,16 +7,25 @@ public class MovingLightScript : MonoBehaviour
     private GameObject speedObj;
     private List<GameObject> movingSpotLightObjList;   //First group 1-4 second group 5-8
     private List<Light> movingLightList;
-    private bool vertical, horizontal, playing, forward, backward;
+    private List<Color> colorArr;
+    private bool vertical, horizontal, playing;
     private float speed;
 
     // Start is called before the first frame update
     void Start()
     {
         speedObj = GameObject.Find("MovingLightSpeedButton");
-        vertical = horizontal = playing = forward = backward = false;
+        vertical = horizontal = playing = false;
         movingSpotLightObjList = new List<GameObject>();
         movingLightList = new List<Light>();
+        colorArr = new List<Color>();
+        colorArr.Add(Color.white);
+        colorArr.Add(Color.cyan);
+        colorArr.Add(Color.green);
+        colorArr.Add(Color.blue);
+        colorArr.Add(Color.magenta);
+        colorArr.Add(Color.yellow);
+        colorArr.Add(Color.red);
         for (int i = 1; i <= 8; ++i)
         {
             movingSpotLightObjList.Add(GameObject.Find(string.Concat("MovingLight", i)));
@@ -74,9 +83,6 @@ public class MovingLightScript : MonoBehaviour
         vertical = true;
         horizontal = false;
         playing = true;
-        forward = true;
-        backward = false;
-        //upNDown();
     }
 
     //Function that sets the flag for our horizontal/vertical spotlight group to move side to side
@@ -85,8 +91,25 @@ public class MovingLightScript : MonoBehaviour
         horizontal = true;
         vertical = false;
         playing = true;
-        forward = true;
-        backward = false;
+    }
+
+    //Assigns the same singular color to each individual light
+    public void changeColorButton()
+    {
+        int color = Random.Range(0, 8);
+        for (int i = 0; i < 8; ++i)
+        {
+            movingLightList[i].color = colorArr[color];
+        }
+    }
+
+    //Assigns the a random color to each individual light
+    public void randColorButton()
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            movingLightList[i].color = colorArr[Random.Range(0, 8)];
+        }
     }
 
     // Update is called once per frame
